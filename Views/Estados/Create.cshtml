@@ -1,0 +1,29 @@
+﻿@model ClientesApp.Models.Estado
+
+<div class="container mt-4">
+    <h2>Novo Estado (UF)</h2>
+
+    <form asp-action="Create" method="post">
+
+        <div class="mb-3">
+            <label class="form-label">UF</label>
+            <input asp-for="UF" class="form-control" maxlength="2" />
+            <span asp-validation-for="UF" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nome do Estado</label>
+            <input asp-for="NomeEstado" class="form-control" />
+            <span asp-validation-for="NomeEstado" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

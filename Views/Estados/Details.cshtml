@@ -1,0 +1,19 @@
+﻿@model ClientesApp.Models.Estado
+
+<div class="container mt-4">
+
+    <h2>Detalhes do Estado</h2>
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-3">UF</dt>
+        <dd class="col-sm-9">@Model.UF</dd>
+
+        <dt class="col-sm-3">Nome do Estado</dt>
+        <dd class="col-sm-9">@Model.NomeEstado</dd>
+    </dl>
+
+    <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+    <a asp-action="Edit" asp-route-id="@Model.IdEstado" class="btn btn-warning">Editar</a>
+
+</div>

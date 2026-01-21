@@ -1,0 +1,20 @@
+﻿@model ClientesApp.Models.Estado
+
+<div class="container mt-4">
+    <h2>Excluir Estado</h2>
+
+    <div class="alert alert-danger">
+        Tem certeza que deseja excluir este estado?
+    </div>
+
+    <ul>
+        <li><strong>UF:</strong> @Model.UF</li>
+        <li><strong>Nome do Estado:</strong> @Model.NomeEstado</li>
+    </ul>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="IdEstado" />
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

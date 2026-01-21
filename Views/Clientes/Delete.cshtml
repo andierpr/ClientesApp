@@ -1,0 +1,23 @@
+﻿@model ClientesApp.Models.Cliente
+
+<div class="container mt-4">
+    <h2>Excluir Cliente</h2>
+
+    <div class="alert alert-danger">
+        Tem certeza que deseja excluir este cliente?
+    </div>
+
+    <ul>
+        <li><strong>Nome:</strong> @Model.Nome</li>
+        <li><strong>Email:</strong> @Model.Email</li>
+        <li><strong>Telefone:</strong> @Model.Telefone ?? "Não informado"</li>
+        <li><strong>Estado:</strong> @(Model.Estado?.NomeEstado ?? "Não informado")</li>
+        <li><strong>UF:</strong> @(Model.Estado?.UF ?? "Não informado")</li>
+    </ul>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Excluir</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

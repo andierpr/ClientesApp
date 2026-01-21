@@ -1,0 +1,121 @@
+﻿@model IEnumerable<ClientesApp.Models.Estado>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold mb-0">🌎 Cadastro de Estados (UF)</h2>
+
+        <a asp-action="Create" class="btn btn-success shadow-sm">
+            ➕ Novo Estado
+        </a>
+    </div>
+
+    <!-- 🔎 FILTRO EM CARD -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+
+            <form method="get" class="row g-2">
+
+                <div class="col-md-6">
+                    <input type="text"
+                           name="busca"
+                           value="@ViewBag.Busca"
+                           class="form-control"
+                           placeholder="Buscar por UF ou nome do estado..." />
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-primary" type="submit">
+                        🔎 Filtrar
+                    </button>
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        ✖ Limpar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ✔️ MENSAGEM -->
+    @if (TempData["msg"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            @TempData["msg"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- 📋 LISTAGEM -->
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center shadow-sm">
+            Nenhum estado encontrado.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+
+            <div class="card-body p-0">
+
+                <table class="table table-hover table-striped mb-0 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="text-center" style="width: 140px;">UF</th>
+                            <th>Nome do Estado</th>
+                            <th class="text-center" style="width: 220px;">Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var e in Model)
+                        {
+                            <tr>
+                                <td class="text-center">
+                                    <span class="badge bg-primary fs-6 shadow-sm">@e.UF</span>
+                                </td>
+
+                                <td class="fw-semibold">@e.NomeEstado</td>
+
+                                <td class="text-center">
+
+                                    <div class="btn-group">
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@e.IdEstado"
+                                           class="btn btn-sm btn-warning">
+                                            ✏ Editar
+                                        </a>
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@e.IdEstado"
+                                           class="btn btn-sm btn-info text-white">
+                                            👁 Detalhes
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@e.IdEstado"
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Confirma exclusão do estado @e.NomeEstado?');">
+                                            🗑 Excluir
+                                        </a>
+
+                                    </div>
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    }
+</div>

@@ -1,0 +1,40 @@
+﻿@model ClientesApp.Models.Cliente
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+<div class="container mt-4">
+    <h2>Editar Cliente</h2>
+
+    <form asp-action="Edit" method="post">
+
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label class="form-label">Nome</label>
+            <input asp-for="Nome" class="form-control" />
+            <span asp-validation-for="Nome" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Telefone</label>
+            <input asp-for="Telefone" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Estado</label>
+            <select asp-for="IdEstado" class="form-select"
+                    asp-items="@(ViewBag.Estados as SelectList)">
+                <option value="">Selecione...</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+
+    </form>
+</div>

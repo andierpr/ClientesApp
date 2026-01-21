@@ -1,0 +1,25 @@
+﻿@model ClientesApp.Models.Cliente
+
+<div class="container mt-4">
+    <h2>Novo Cliente</h2>
+
+    <form method="post">
+        <div class="mb-3">
+            <label>Nome</label>
+            <input class="form-control" asp-for="Nome" />
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            <input class="form-control" asp-for="Email" />
+        </div>
+
+        <div class="mb-3">
+            <label>Telefone</label>
+            <input class="form-control" asp-for="Telefone" />
+        </div>
+
+        <button class="btn btn-success">Salvar</button>
+        <a class="btn btn-secondary" href="/Clientes">Voltar</a>
+    </form>
+</div>

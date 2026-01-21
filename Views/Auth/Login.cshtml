@@ -1,0 +1,40 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<div class="container mt-5" style="max-width:450px">
+
+    <div class="card shadow p-4">
+
+        <h3 class="text-center mb-3 fw-bold">🔐 Login</h3>
+
+        @if (ViewBag.Erro != null)
+        {
+            <div class="alert alert-danger text-center">@ViewBag.Erro</div>
+        }
+
+        <form method="post">
+
+            <div class="mb-3">
+                <label>Email</label>
+                <input name="email" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label>Senha</label>
+                <input name="senha" type="password" class="form-control" />
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" name="lembrar" type="checkbox" />
+                <label class="form-check-label">Lembrar-me</label>
+            </div>
+
+            <button class="btn btn-primary w-100">Entrar</button>
+@* 
+            <a asp-action="Register" class="btn btn-link w-100">
+                Criar conta
+            </a> *@
+        </form>
+    </div>
+</div>

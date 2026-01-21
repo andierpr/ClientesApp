@@ -1,0 +1,126 @@
+﻿@model IEnumerable<ClientesApp.Models.Cliente>
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">📋 Lista de Clientes</h2>
+
+        <a asp-controller="Clientes"
+           asp-action="Create"
+           class="btn btn-success">
+            ➕ Novo Cliente
+        </a>
+    </div>
+
+    <!-- 🔍 FILTRO -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+
+            <form method="get" class="row g-2">
+
+                <div class="col-md-6">
+                    <input type="text"
+                           name="busca"
+                           value="@ViewBag.Busca"
+                           class="form-control"
+                           placeholder="Buscar por nome ou e-mail..." />
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <button class="btn btn-primary" type="submit">
+                        🔎 Filtrar
+                    </button>
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        ✖ Limpar
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ✔️ MENSAGEM -->
+    @if (TempData["msg"] != null)
+    {
+        <div class="alert alert-success shadow-sm">
+            @TempData["msg"]
+        </div>
+    }
+
+    <!-- 📌 LISTAGEM -->
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info shadow-sm">
+            Nenhum cliente encontrado.
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+
+                <table class="table table-hover table-striped mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nome</th>
+                            <th>E-mail</th>
+                            <th>Telefone</th>
+                            <th>Estado</th>
+                            <th>UF</th>
+                            <th class="text-center" style="width: 220px;">Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td>@c.Nome</td>
+                                <td>@c.Email</td>
+                                <td>@c.TelefoneExibicao</td>
+                                <td>@c.NomeEstadoExibicao</td>
+                                <td>
+                                    <span class="badge bg-primary">
+                                        @c.UFExibicao
+                                    </span>
+                                </td>
+
+                                <td class="text-center">
+
+                                    <div class="btn-group">
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@c.Id"
+                                           class="btn btn-sm btn-warning">
+                                            ✏ Editar
+                                        </a>
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@c.Id"
+                                           class="btn btn-sm btn-info text-white">
+                                            👁 Detalhes
+                                        </a>
+
+                                        <a asp-action="Delete"
+                                           asp-route-id="@c.Id"
+                                           class="btn btn-sm btn-danger">
+                                            🗑 Excluir
+                                        </a>
+
+                                    </div>
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+    }
+</div>

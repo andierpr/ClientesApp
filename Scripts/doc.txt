@@ -1,0 +1,80 @@
+| Tecnologia            | Finalidade              |
+| --------------------- | ----------------------- |
+| .NET 8 MVC            | Backend + Frontend      |
+| C#                    | Linguagem               |
+| Entity Framework Core | ORM                     |
+| MySQL                 | Banco de dados          |
+| Bootstrap 5           | Layout e responsividade |
+| CSS                   | Estilização             |
+| MVC                   | Padrão arquitetural     |
+
+| --------------------- | ----------------------- |
+Arquitetura do Projeto
+
+Padrão MVC
+Model      → representa os dados (Cliente)
+View       → telas .cshtml
+Controller → regras e navegação
+
+
+| --------------------- | ----------------------- |
+
+Estrutura de pastas
+ClientesApp/
+ ├── Controllers/
+ │     ClientesController.cs
+ │
+ ├── Models/
+ │     Cliente.cs
+ │
+ ├── Data/
+ │     ClientesContext.cs
+ │
+ ├── Views/
+ │    ├── Clientes/
+ │    │     Index.cshtml
+ │    │     Create.cshtml
+ │    │     Edit.cshtml
+ │    │     Delete.cshtml
+ │    │     Details.cshtml
+ │
+ └── appsettings.json
+
+
+| --------------------- | ----------------------- |
+
+1Criar projeto MVC
+dotnet new mvc -n ClientesApp
+
+Entrar no projeto
+cd ClientesApp
+
+| --------------------- | ----------------------- |
+Instalar pacotes do MySQL + EF Core
+dotnet add package Pomelo.EntityFrameworkCore.MySql
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+
+
+| --------------------- | ----------------------- |
+Criar banco de dados MySQL
+CREATE DATABASE ClientesDb;
+
+| --------------------- | ----------------------- |
+Configurar connection string
+ appsettings.json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=127.0.0.1;Database=ClientesDb;Uid=root;Pwd=admin;"
+}
+
+| --------------------- | ----------------------- |
+Criar Model Cliente
+Models/Cliente.cs
+public class Cliente
+{
+    public int Id { get; set; }
+    public string Nome { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string? Telefone { get; set; }
+}
+
+| --------------------- | ----------------------- |
