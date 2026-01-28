@@ -1,22 +1,38 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ClientesApp.Models;
+﻿using ClientesApp.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClientesApp.Data
 {
     public class ClientesContext : DbContext
     {
-        public ClientesContext(DbContextOptions<ClientesContext> options) : base(options) { }
+        public ClientesContext(DbContextOptions<ClientesContext> options)
+            : base(options)
+        {
+        }
 
+        // =====================
+        // DbSets
+        // =====================
         public DbSet<Cliente> Clientes { get; set; } = null!;
         public DbSet<Estado> Estados { get; set; } = null!;
-        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Usuario> Usuarios { get; set; } = null!;
 
-
+        // =====================
+        // Fluent API
+        // =====================
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // ---------- ESTADOS ----------
+            ConfigureEstado(modelBuilder);
+            ConfigureCliente(modelBuilder);
+        }
+
+        // =====================
+        // Configurações de Estado
+        // =====================
+        private static void ConfigureEstado(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Estado>(entity =>
             {
                 entity.ToTable("Estados");
@@ -27,15 +43,20 @@ namespace ClientesApp.Data
                       .HasColumnName("IdEstado");
 
                 entity.Property(e => e.UF)
-                      .HasMaxLength(2)
-                      .IsRequired();
+                      .IsRequired()
+                      .HasMaxLength(2);
 
                 entity.Property(e => e.NomeEstado)
-                      .HasMaxLength(100)
-                      .IsRequired();
+                      .IsRequired()
+                      .HasMaxLength(100);
             });
+        }
 
-            // ---------- CLIENTES ----------
+        // =====================
+        // Configurações de Cliente
+        // =====================
+        private static void ConfigureCliente(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Cliente>(entity =>
             {
                 entity.ToTable("Clientes");

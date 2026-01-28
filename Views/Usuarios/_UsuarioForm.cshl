@@ -1,0 +1,80 @@
+﻿@model ClientesApp.Models.UsuarioEditar
+
+<div class="mb-3">
+    <label asp-for="Nome" class="form-label"></label>
+    <input asp-for="Nome" class="form-control" />
+    <span asp-validation-for="Nome" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Login" class="form-label"></label>
+    <input asp-for="Login" class="form-control" />
+    <span asp-validation-for="Login" class="text-danger"></span>
+</div>
+
+<div class="mb-3">
+    <label asp-for="Email" class="form-label"></label>
+    <input asp-for="Email" class="form-control" />
+    <span asp-validation-for="Email" class="text-danger"></span>
+</div>
+
+@* 🔒 Apenas administradores podem alterar Role *@
+@if (User.IsInRole("Administrador"))
+{
+    <div class="mb-3">
+        <label asp-for="Role" class="form-label">Perfil</label>
+        <select asp-for="Role" class="form-select"
+                asp-items="Html.GetEnumSelectList<ClientesApp.Enums.UserRole>()">
+        </select>
+        <span asp-validation-for="Role" class="text-danger"></span>
+    </div>
+}
+
+<div class="mb-3 position-relative">
+    <label asp-for="NovaSenha" class="form-label">
+        @if (Model.IdUsuario > 0)
+        {
+            <text>Nova Senha (opcional)</text>
+        }
+        else
+        {
+            <text>Senha</text>
+        }
+    </label>
+    <input asp-for="NovaSenha" class="form-control" id="NovaSenha" />
+    <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 mt-2 me-2"
+            onclick="togglePassword('NovaSenha', this)">
+        👁️
+    </button>
+    <span asp-validation-for="NovaSenha" class="text-danger"></span>
+</div>
+
+<div class="mb-3 position-relative">
+    <label asp-for="ConfirmarSenha" class="form-label">Confirmar Senha</label>
+    <input asp-for="ConfirmarSenha" class="form-control" id="ConfirmarSenha" />
+    <button type="button" class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0 mt-2 me-2"
+            onclick="togglePassword('ConfirmarSenha', this)">
+        👁️
+    </button>
+    <span asp-validation-for="ConfirmarSenha" class="text-danger"></span>
+</div>
+
+<div class="form-check mb-3">
+    <input asp-for="Ativo" class="form-check-input" />
+    <label asp-for="Ativo" class="form-check-label"></label>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                btn.textContent = "🙈";
+            } else {
+                input.type = "password";
+                btn.textContent = "👁️";
+            }
+        }
+    </script>
+}

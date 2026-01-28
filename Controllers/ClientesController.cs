@@ -4,6 +4,7 @@ using ClientesApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 namespace ClientesApp.Controllers
 {
@@ -17,32 +18,34 @@ namespace ClientesApp.Controllers
             _context = context;
         }
 
-        // LISTAR
-        public async Task<IActionResult> Index()
+        // =========================
+        // LISTAGEM (com ou sem filtro)
+        // =========================
+        [HttpGet]
+        public async Task<IActionResult> Index(string? busca)
         {
-            var clientes = await _context.Clientes
-                .Include(c => c.Estado) // Inclui Estado e UF
-                .AsNoTracking()
+            var query = QueryClientes();
+
+            if (!string.IsNullOrWhiteSpace(busca))
+            {
+                busca = busca.Trim();
+                query = query.Where(c =>
+                    c.Nome.Contains(busca) ||
+                    c.Email.Contains(busca));
+            }
+
+            ViewBag.Busca = busca;
+
+            var clientes = await query
+                .OrderBy(c => c.Nome)
                 .ToListAsync();
 
             return View(clientes);
         }
 
-        // Carregar lista de Estados para dropdown
-        private async Task CarregarEstadosAsync(object? selecionado = null)
-        {
-            ViewBag.Estados = new SelectList(
-                await _context.Estados
-                    .OrderBy(e => e.NomeEstado)
-                    .AsNoTracking()
-                    .ToListAsync(),
-                "IdEstado",
-                "NomeEstado",
-                selecionado
-            );
-        }
-
+        // =========================
         // DETALHES
+        // =========================
         public async Task<IActionResult> Details(int? id)
         {
             if (id is null)
@@ -50,20 +53,20 @@ namespace ClientesApp.Controllers
 
             var cliente = await ObterClientePorIdAsync(id.Value, asNoTracking: true);
 
-            if (cliente is null)
-                return NotFound();
-
-            return View(cliente);
+            return cliente is null
+                ? NotFound()
+                : View(cliente);
         }
 
-        // CREATE GET
+        // =========================
+        // CREATE
+        // =========================
         public async Task<IActionResult> Create()
         {
             await CarregarEstadosAsync();
             return View();
         }
 
-        // CREATE POST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Nome,Email,Telefone,IdEstado")] Cliente cliente)
@@ -74,23 +77,16 @@ namespace ClientesApp.Controllers
                 return View(cliente);
             }
 
-            try
-            {
-                _context.Add(cliente);
-                await _context.SaveChangesAsync();
+            _context.Add(cliente);
+            await _context.SaveChangesAsync();
 
-                TempData["msg"] = "Cliente cadastrado com sucesso!";
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                ModelState.AddModelError(string.Empty, "Erro ao salvar o cliente.");
-                await CarregarEstadosAsync(cliente.IdEstado);
-                return View(cliente);
-            }
+            TempData["msg"] = "Cliente cadastrado com sucesso!";
+            return RedirectToAction(nameof(Index));
         }
 
-        // EDIT GET
+        // =========================
+        // EDIT
+        // =========================
         public async Task<IActionResult> Edit(int? id)
         {
             if (id is null)
@@ -102,13 +98,9 @@ namespace ClientesApp.Controllers
                 return NotFound();
 
             await CarregarEstadosAsync(cliente.IdEstado);
-
             return View(cliente);
         }
 
-
-
-        // EDIT POST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Email,Telefone,IdEstado")] Cliente cliente)
@@ -139,39 +131,9 @@ namespace ClientesApp.Controllers
             }
         }
 
-
-
-        // LISTAR (com filtro por nome ou email)
-        [HttpGet]
-        public async Task<IActionResult> Index(string? busca)
-        {
-            var query = _context.Clientes
-                .Include(c => c.Estado)
-                .AsNoTracking()
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(busca))
-            {
-                busca = busca.Trim();
-
-                query = query.Where(c =>
-                    c.Nome.Contains(busca) ||
-                    c.Email.Contains(busca));
-            }
-
-            ViewBag.Busca = busca;
-
-            var clientes = await query
-                .OrderBy(c => c.Nome)
-                .ToListAsync();
-
-            return View(clientes);
-        }
-
-
-
-
-        // DELETE GET
+        // =========================
+        // DELETE
+        // =========================
         public async Task<IActionResult> Delete(int? id)
         {
             if (id is null)
@@ -179,13 +141,11 @@ namespace ClientesApp.Controllers
 
             var cliente = await ObterClientePorIdAsync(id.Value, asNoTracking: true);
 
-            if (cliente is null)
-                return NotFound();
-
-            return View(cliente);
+            return cliente is null
+                ? NotFound()
+                : View(cliente);
         }
 
-        // DELETE POST
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -202,10 +162,48 @@ namespace ClientesApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // MÉTODO PRIVADO: Obter Cliente por Id (incluindo Estado)
+        // =========================
+        // MÉTODOS AUXILIARES
+        // =========================
+
+        private IQueryable<Cliente> QueryClientes() =>
+            _context.Clientes
+                .Include(c => c.Estado)
+                .AsNoTracking();
+
+        /// <summary>
+        /// Carrega:
+        ///  - ViewBag.Estados (dropdown NomeEstado)
+        ///  - ViewBag.EstadosJson (IdEstado + UF para JS)
+        /// </summary>
+        private async Task CarregarEstadosAsync(object? selecionado = null)
+        {
+            var estados = await _context.Estados
+                .OrderBy(e => e.NomeEstado)
+                .AsNoTracking()
+                .ToListAsync();
+
+            ViewBag.Estados = new SelectList(
+                estados,
+                "IdEstado",
+                "NomeEstado",
+                selecionado
+            );
+
+            ViewBag.EstadosJson = JsonSerializer.Serialize(
+                estados.Select(e => new
+                {
+                    e.IdEstado,
+                    e.UF
+                })
+            );
+        }
+
         private async Task<Cliente?> ObterClientePorIdAsync(int id, bool asNoTracking = false)
         {
-            var query = _context.Clientes.Include(c => c.Estado).AsQueryable();
+            var query = _context.Clientes
+                .Include(c => c.Estado)
+                .AsQueryable();
 
             if (asNoTracking)
                 query = query.AsNoTracking();
@@ -213,7 +211,6 @@ namespace ClientesApp.Controllers
             return await query.FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        // MÉTODO PRIVADO: Verificar se cliente existe
         private Task<bool> ClienteExistsAsync(int id) =>
             _context.Clientes.AnyAsync(c => c.Id == id);
     }

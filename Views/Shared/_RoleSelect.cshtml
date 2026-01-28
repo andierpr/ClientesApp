@@ -1,0 +1,14 @@
+﻿@model ClientesApp.Models.UsuarioEditar
+@{
+    var isDisabled = !User.IsInRole("Administrador");
+}
+
+<div class="mb-3">
+    <label asp-for="Role" class="form-label">Perfil</label>
+    <select asp-for="Role"
+            class="form-select"
+            asp-items="Html.GetEnumSelectList<ClientesApp.Enums.UserRole>()"
+            disabled="@(isDisabled ? "disabled" : null)">
+    </select>
+    <span asp-validation-for="Role" class="text-danger"></span>
+</div>

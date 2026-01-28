@@ -1,5 +1,5 @@
-﻿using BCrypt.Net;
-using ClientesApp.Data;
+﻿using ClientesApp.Data;
+using ClientesApp.Helpers;
 using ClientesApp.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -23,46 +23,56 @@ namespace ClientesApp.Controllers
         // LOGIN
         // =====================
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login()
+        {
+            return View();
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string email, string senha, bool lembrar = false)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string login, string senha, bool lembrar = false)
         {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
+            if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(senha))
             {
-                ModelState.AddModelError("", "Informe email e senha");
+                ModelState.AddModelError(string.Empty, "Informe login/email e senha");
                 return View();
             }
 
-            email = email.Trim().ToLower();
+            login = login.Trim().ToLowerInvariant();
             senha = senha.Trim();
 
-            // Busca usuário ativo
-            var user = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == email && u.Ativo);
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u =>
+                u.Ativo &&
+                (
+                    u.Email == login ||
+                    u.Login == login
+                )
+            );
 
-            // Valida senha com BCrypt
-            if (user == null || !BCrypt.Net.BCrypt.Verify(senha, user.SenhaHash))
+            if (usuario == null || !Criptografia.Verificar(senha, usuario.SenhaHash))
             {
-                ModelState.AddModelError("", "Usuário ou senha inválidos");
+                ModelState.AddModelError(string.Empty, "Usuário ou senha inválidos");
+                ViewBag.Login = login;
                 return View();
             }
 
-            // Atualiza UltimoLogin
-            user.UltimoLogin = DateTime.Now;
-            _context.Usuarios.Update(user);
+            usuario.UltimoLogin = DateTime.Now;
+            usuario.UltimoAcesso = DateTime.Now;
+
             await _context.SaveChangesAsync();
 
-            // Cria claims e autentica usuário
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.IdUsuario.ToString()),
-                new Claim(ClaimTypes.Name, user.Nome),
-                new Claim(ClaimTypes.Email, user.Email)
-            };
+    {
+        new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
+        new Claim(ClaimTypes.Name, usuario.Nome),
+        new Claim(ClaimTypes.Email, usuario.Email),
+        new Claim(ClaimTypes.Role, usuario.Role) 
+    };
 
             var identity = new ClaimsIdentity(claims, AUTH_SCHEME);
             var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignOutAsync(AUTH_SCHEME);
 
             await HttpContext.SignInAsync(
                 AUTH_SCHEME,
@@ -70,65 +80,24 @@ namespace ClientesApp.Controllers
                 new AuthenticationProperties
                 {
                     IsPersistent = lembrar,
-                    ExpiresUtc = lembrar ? DateTime.UtcNow.AddDays(7) : DateTime.UtcNow.AddHours(2)
+                    ExpiresUtc = lembrar
+                        ? DateTime.UtcNow.AddDays(7)
+                        : DateTime.UtcNow.AddHours(2)
                 });
 
             return RedirectToAction("Index", "Home");
         }
 
+
         // =====================
         // LOGOUT
         // =====================
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(AUTH_SCHEME);
-            return RedirectToAction("Login");
-        }
-
-        // =====================
-        // REGISTER
-        // =====================
-        [HttpGet]
-        public IActionResult Register() => View();
-
-        [HttpPost]
-        public async Task<IActionResult> Register(string nome, string? login, string email, string senha)
-        {
-            if (string.IsNullOrWhiteSpace(nome) ||
-                string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(senha))
-            {
-                ModelState.AddModelError("", "Preencha todos os campos");
-                return View();
-            }
-
-            email = email.Trim().ToLower();
-            login = login?.Trim(); // nullable
-            senha = senha.Trim();
-
-            // Verifica duplicidade de email
-            if (await _context.Usuarios.AnyAsync(u => u.Email == email))
-            {
-                ModelState.AddModelError("", "E-mail já cadastrado.");
-                return View();
-            }
-
-            // Cria usuário
-            var user = new Usuario
-            {
-                Nome = nome,
-                Login = login,
-                Email = email,
-                SenhaHash = BCrypt.Net.BCrypt.HashPassword(senha),
-                Ativo = true
-            };
-
-            _context.Usuarios.Add(user);
-            await _context.SaveChangesAsync();
-
-            TempData["msg"] = "Usuário cadastrado com sucesso. Faça login.";
-            return RedirectToAction("Login");
+            return RedirectToAction(nameof(Login));
         }
     }
 }

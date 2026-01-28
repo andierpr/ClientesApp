@@ -4,18 +4,26 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC
+// ==============================
+// MVC + API Controllers
+// ==============================
 builder.Services.AddControllersWithViews();
 
+// ==============================
 // Banco de Dados
+// ==============================
+var connectionString = builder.Configuration.GetConnectionString("ClientesDb");
+
 builder.Services.AddDbContext<ClientesContext>(options =>
     options.UseMySql(
-        builder.Configuration.GetConnectionString("ClientesDb"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("ClientesDb"))
+        connectionString,
+        ServerVersion.AutoDetect(connectionString)
     )
 );
 
+// ==============================
 // Sessão
+// ==============================
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -23,27 +31,44 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// ==============================
 // Autenticação por Cookie
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+// ==============================
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
         options.ExpireTimeSpan = TimeSpan.FromHours(2);
+        options.SlidingExpiration = true;
     });
 
-builder.Services.AddSession();
-
+// ==============================
+// Swagger
+// ==============================
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Erros
-if (!app.Environment.IsDevelopment())
+// ==============================
+// Pipeline HTTP
+// ==============================
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ClientesApp API");
+        c.RoutePrefix = "swagger";
+    });
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
 }
 
-// pipeline
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -53,15 +78,18 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Rotas
+// ==============================
+// Rotas MVC
+// ==============================
 app.MapControllerRoute(
     name: "default",
-   // pattern: "{controller=Login}/{action=Index}/{id?}");
-    pattern: "{controller=Auth}/{action=Login}/{id?}");
+    pattern: "{controller=Auth}/{action=Login}/{id?}"
+);
 
-
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Clientes}/{action=Index}/{id?}");
+// ==============================
+// Rotas API
+// ==============================
+app.MapControllers();
 
 app.Run();
+

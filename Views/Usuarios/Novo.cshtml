@@ -1,0 +1,31 @@
+﻿@model ClientesApp.Models.UsuarioEditar
+@{
+    ViewData["Title"] = "Novo Usuário";
+}
+
+<h2>Novo Usuário</h2>
+
+<form asp-action="Novo" method="post">
+    @Html.AntiForgeryToken()
+
+    @await Html.PartialAsync("_UsuarioForm", Model)
+
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                btn.textContent = "🙈";
+            } else {
+                input.type = "password";
+                btn.textContent = "👁️";
+            }
+        }
+    </script>
+}

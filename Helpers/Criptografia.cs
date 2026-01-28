@@ -1,13 +1,32 @@
-﻿using System.Security.Cryptography;
-using System.Text;
+﻿using BCrypt.Net;
 
-public static class Criptografia
+namespace ClientesApp.Helpers
 {
-    public static string GerarHash(string senha)
+    public static class Criptografia
     {
-        using var sha = SHA256.Create();
-        var bytes = Encoding.UTF8.GetBytes(senha);
-        var hash = sha.ComputeHash(bytes);
-        return BitConverter.ToString(hash).Replace("-", "").ToLower();
+        private const int WORK_FACTOR = 12;
+
+        public static string GerarHash(string senha)
+        {
+            if (string.IsNullOrWhiteSpace(senha))
+                throw new ArgumentException("Senha inválida");
+
+            return BCrypt.Net.BCrypt.HashPassword(senha.Trim(), workFactor: WORK_FACTOR);
+        }
+
+        public static bool Verificar(string senhaDigitada, string hashArmazenado)
+        {
+            if (string.IsNullOrWhiteSpace(senhaDigitada) || string.IsNullOrWhiteSpace(hashArmazenado))
+                return false;
+
+            try
+            {
+                return BCrypt.Net.BCrypt.Verify(senhaDigitada.Trim(), hashArmazenado);
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

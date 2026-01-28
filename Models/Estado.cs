@@ -14,6 +14,7 @@ namespace ClientesApp.Models
         public string NomeEstado { get; set; } = null!;
 
         public ICollection<Cliente>? Clientes { get; set; }
+       // public ICollection<Cliente> Clientes { get; set; } = new List<Cliente>();
     }
 }
 

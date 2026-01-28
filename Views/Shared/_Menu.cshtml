@@ -1,0 +1,65 @@
+﻿@using ClientesApp.Enums
+@inject Microsoft.AspNetCore.Identity.IUserClaimsPrincipalFactory<Microsoft.AspNetCore.Identity.IdentityUser> UserFactory
+
+@* Partial View para o menu principal *@
+<nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm mb-3">
+    <div class="container-fluid">
+
+        <!-- LOGO -->
+        <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+            ClientesApp
+        </a>
+
+        <!-- TOGGLER MOBILE -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                aria-controls="mainNavbar" aria-expanded="false" aria-label="Alternar navegação">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div id="mainNavbar" class="navbar-collapse collapse d-sm-inline-flex justify-content-between align-items-center">
+
+            <!-- MENU PRINCIPAL -->
+            <ul class="navbar-nav flex-grow-1 gap-sm-1">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Clientes" asp-action="Index">Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Estados" asp-action="Index">Estados (UF)</a>
+                </li>
+
+                @* 🔒 MENU ADMIN *@
+                @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Administrador"))
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Usuários
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-start">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Usuarios" asp-action="Index">Listar Usuários</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Usuarios" asp-action="Novo">Novo Usuário</a>
+                            </li>
+                        </ul>
+                    </li>
+                }
+            </ul>
+
+            <!-- USUÁRIO LOGADO / LOGOUT -->
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="d-flex align-items-center gap-2">
+                    <span class="fw-semibold">Olá, @User.Identity.Name</span>
+                    <form asp-controller="Auth" asp-action="Logout" method="post" class="m-0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Sair</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</nav>

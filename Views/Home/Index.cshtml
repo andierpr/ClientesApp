@@ -3,23 +3,79 @@
 <div class="container mt-4">
     <h2>Novo Cliente</h2>
 
-    <form method="post">
+    <form method="post" asp-action="Novo">
+        @Html.AntiForgeryToken()
+
         <div class="mb-3">
-            <label>Nome</label>
-            <input class="form-control" asp-for="Nome" />
+            <label asp-for="Nome" class="form-label"></label>
+            <input asp-for="Nome" class="form-control" />
+            <span asp-validation-for="Nome" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label>Email</label>
-            <input class="form-control" asp-for="Email" />
+            <label asp-for="Email" class="form-label"></label>
+            <input asp-for="Email" type="email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
         <div class="mb-3">
-            <label>Telefone</label>
-            <input class="form-control" asp-for="Telefone" />
+            <label asp-for="Telefone" class="form-label"></label>
+            <input asp-for="Telefone" class="form-control" id="Telefone" />
+            <span asp-validation-for="Telefone" class="text-danger"></span>
         </div>
 
-        <button class="btn btn-success">Salvar</button>
-        <a class="btn btn-secondary" href="/Clientes">Voltar</a>
+        <!-- ESTADO -->
+        <div class="mb-3">
+            <label asp-for="IdEstado" class="form-label">Estado</label>
+            <select asp-for="IdEstado"
+                    class="form-select"
+                    asp-items="ViewBag.Estados"
+                    id="estadoSelect">
+                <option value="">Selecione...</option>
+            </select>
+            <span asp-validation-for="IdEstado" class="text-danger"></span>
+        </div>
+
+        <!-- UF (AUTOMÁTICA) -->
+        <div class="mb-3">
+            <label class="form-label">UF</label>
+            <input type="text"
+                   class="form-control"
+                   id="ufInput"
+                   readonly />
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a asp-action="Index" class="btn btn-secondary">Voltar</a>
     </form>
 </div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery.inputmask/dist/jquery.inputmask.min.js"></script>
+
+    <script>
+        const estados = @Html.Raw(ViewBag.EstadosJson);
+
+        $(document).ready(function () {
+
+            // Máscara telefone
+            $('#Telefone').inputmask('(99) 99999-9999');
+
+            // Estado → UF
+            $('#estadoSelect').on('change', function () {
+                const idEstado = $(this).val();
+                const estado = estados.find(e => e.IdEstado == idEstado);
+
+                if (estado) {
+                    $('#ufInput').val(estado.UF);
+                } else {
+                    $('#ufInput').val('');
+                }
+            });
+        });
+    </script>
+}
